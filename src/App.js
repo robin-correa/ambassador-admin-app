@@ -1,23 +1,30 @@
-import logo from './logo.svg';
-import './App.css';
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Switch } from "react-router-dom";
+import { GuardProvider, GuardedRoute } from "react-router-guards";
+import routes, { requireLogin } from "./routes";
+import "./App.css";
+
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Loading = lazy(() => import("./pages/Loading"));
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+      <BrowserRouter>
+        <GuardProvider
+          guards={[requireLogin]}
+          loading={Loading}
+          error={NotFound}
         >
-          Learn React
-        </a>
-      </header>
+          <Suspense fallback={null}>
+            <Switch>
+              {routes.map((props) => {
+                return <GuardedRoute exact {...props} />;
+              })}
+            </Switch>
+          </Suspense>
+        </GuardProvider>
+      </BrowserRouter>
     </div>
   );
 }
